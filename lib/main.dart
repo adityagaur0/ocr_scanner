@@ -34,14 +34,22 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
+// widgetbindingObserver:  to display camera feed in our app ,we will need to have control of the lifecycle
+// of our main widget
+
 class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
+  //to manage the the permission to camera is granted.
   bool _isPermissionGranted = false;
 
+  // future will be executed first to request the permission.
   late final Future<void> _future;
   CameraController? _cameraController;
   final textRecognizer = TextRecognizer();
 
   @override
+//to display camera feed in our app ,we will need to have control of the lifecycle
+// of our main widget, we can achieve this by adding the widgetbindingobserver mixin,
+// adding in init state to turn main screen state to life cycle observer. // add dispose to it too.
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -58,6 +66,10 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   }
 
   @override
+
+  // thanks to above actions ||||||
+  // we can override the didChangeAppLifecycleState, which will give us info about
+  // wether the app  is in foreground or background
   void didChangeAppLifecycleState(AppLifecycleState state) {
     //TODO: control the camera flow
 
@@ -80,9 +92,14 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    //future builder will execute the future that will request the permission in the beigining.
     return FutureBuilder(
       future: _future,
       builder: (context, snapshot) {
+        //finally add camera to the tree
+        //we added scaffold behind the stack because,
+        //empty bands will be seen around it,
+        //considering the camera has same aspect ratio as mobile
         return Stack(
           children: [
             if (_isPermissionGranted)
@@ -94,7 +111,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
                     return Center(child: CameraPreview(_cameraController!));
                   } else {
-                    return const LinearProgressIndicator();
+                    return const LinearProgressIndicator(); // to show camera is not granted
                   }
                 },
               ),
@@ -136,6 +153,9 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     );
   }
 
+  // private method in charge of requesting the permission and upadating the
+  //state based on the result
+  //avoid this way to Insted use
   Future<void> _requestCameraPermission() async {
     final status = await Permission.camera.request();
     _isPermissionGranted = status == PermissionStatus.granted;
@@ -143,6 +163,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   //method to open the camera
   void _startCamera() {
+    //very imp to check weather camera controller is not null.
     if (_cameraController != null) {
       _cameraSelected(_cameraController!.description);
     }
@@ -179,15 +200,20 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     }
   }
 
+  // responsible to initalise the camera already defined
   Future<void> _cameraSelected(CameraDescription camera) async {
     _cameraController = CameraController(
       camera,
-      ResolutionPreset.max,
+      ResolutionPreset
+          .max, // set resolution to maximum that will help text detection.
       enableAudio: false,
     );
 
+    // asynchronus method to perform initalization
     await _cameraController!.initialize();
     await _cameraController!.setFlashMode(FlashMode.off);
+
+    // incharget of refreshing the state in order to show already intialized camera.
 
     if (!mounted) {
       return;
@@ -195,18 +221,24 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     setState(() {});
   }
 
+//scan image
   Future<void> _scanImage() async {
+    //first check camera contrller is not null
     if (_cameraController == null) return;
 
+    //to direct the user to result screen
     final navigator = Navigator.of(context);
 
     try {
+      //obtain picture from camera
       final pictureFile = await _cameraController!.takePicture();
 
       final file = File(pictureFile.path);
 
       final inputImage = InputImage.fromFile(file);
-      final recognizedText = await textRecognizer.processImage(inputImage);
+
+      final recognizedText =
+          await textRecognizer.processImage(inputImage); //google ml kit
 
       await navigator.push(
         MaterialPageRoute(
