@@ -21,12 +21,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // future will be executed first to request the permission.
   late final Future<void> _future;
   CameraController? _cameraController;
-  final textRecognizer = TextRecognizer();
 
   @override
-//to display camera feed in our app ,we will need to have control of the lifecycle
-// of our main widget, we can achieve this by adding the widgetbindingobserver mixin,
-// adding in init state to turn main screen state to life cycle observer. // add dispose to it too.
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -38,29 +34,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _stopCamera();
-    textRecognizer.close();
     super.dispose();
   }
 
   @override
-
-  // thanks to above actions ||||||
-  // we can override the didChangeAppLifecycleState, which will give us info about
-  // wether the app  is in foreground or background
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    //TODO: control the camera flow
-
-    //check camera controller is not null and it has been initalized.
     if (_cameraController == null || !_cameraController!.value.isInitialized) {
       return;
     }
-
-    //if the state is inactive we stop the camera.
     if (state == AppLifecycleState.inactive) {
       _stopCamera();
-    } else if (state ==
-            AppLifecycleState
-                .resumed && //if the state is resumed,app sent to the foreground,open the camera.
+    } else if (state == AppLifecycleState.resumed &&
         _cameraController != null &&
         _cameraController!.value.isInitialized) {
       _startCamera();
@@ -69,14 +53,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    //future builder will execute the future that will request the permission in the beigining.
     return FutureBuilder(
       future: _future,
       builder: (context, snapshot) {
-        //finally add camera to the tree
-        //we added scaffold behind the stack because,
-        //empty bands will be seen around it,
-        //considering the camera has same aspect ratio as mobile
         return GestureDetector(
           onTap: _scanImage,
           child: Stack(
@@ -109,11 +88,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           Container(
                             padding: const EdgeInsets.only(bottom: 30.0),
                             child: Center(
-                                // child: ElevatedButton(
-                                //   onPressed: _scanImage,
-                                //   child: const Text('Scan text'),
-                                // ),
-                                ),
+                              child: ElevatedButton(
+                                onPressed: _scanImage,
+                                child: const Text('Scan text'),
+                              ),
+                            ),
                           ),
                         ],
                       )
