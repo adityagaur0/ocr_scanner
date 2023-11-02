@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:ocr_scanner/result.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:tflite_v2/tflite_v2.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +29,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _future = _requestCameraPermission();
+    loadmodel().then((value) {
+      setState(() {});
+    });
   }
 
   @override
@@ -178,9 +182,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       final inputImage = InputImage.fromFile(file);
 
-      // final recognizedText =
-      //     await textRecognizer.processImage(inputImage); //google ml kit
-
       // await navigator.push(
       //   MaterialPageRoute(
       //     builder: (BuildContext context) =>
@@ -194,5 +195,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       );
     }
+  }
+
+  loadmodel() async {
+    await Tflite.loadModel(
+      model: "assets/ML/model_unquant.tflite",
+      labels: "assets/ML/labels.txt",
+    );
   }
 }
