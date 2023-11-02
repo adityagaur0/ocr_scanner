@@ -114,38 +114,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  // private method in charge of requesting the permission and upadating the
-  //state based on the result
-  //avoid this way to Insted use
   Future<void> _requestCameraPermission() async {
     final status = await Permission.camera.request();
     _isPermissionGranted = status == PermissionStatus.granted;
   }
 
-  //method to open the camera
   void _startCamera() {
-    //very imp to check weather camera controller is not null.
     if (_cameraController != null) {
       _cameraSelected(_cameraController!.description);
     }
   }
 
-  //method to close the camera
   void _stopCamera() {
     if (_cameraController != null) {
       _cameraController?.dispose();
     }
   }
 
-//method to initalise the camera controller
   void _initCameraController(List<CameraDescription> cameras) {
-    //we check the _cameracontroller variable is not already intialised.
     if (_cameraController != null) {
-      return; // if so we exit the method
+      return;
     }
 
-    //select which camera we want
-    //iterate all the cameras and choose the first camera which point backward.
     CameraDescription? camera;
     for (var i = 0; i < cameras.length; i++) {
       final CameraDescription current = cameras[i];
@@ -155,26 +145,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     }
 
-    //pass to another method
     if (camera != null) {
       _cameraSelected(camera);
     }
   }
 
-  // responsible to initalise the camera already defined
   Future<void> _cameraSelected(CameraDescription camera) async {
     _cameraController = CameraController(
       camera,
-      ResolutionPreset
-          .max, // set resolution to maximum that will help text detection.
+      ResolutionPreset.max,
       enableAudio: false,
     );
 
-    // asynchronus method to perform initalization
     await _cameraController!.initialize();
     await _cameraController!.setFlashMode(FlashMode.off);
-
-    // incharget of refreshing the state in order to show already intialized camera.
 
     if (!mounted) {
       return;
@@ -182,31 +166,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     setState(() {});
   }
 
-//scan image
   Future<void> _scanImage() async {
-    //first check camera contrller is not null
     if (_cameraController == null) return;
 
-    //to direct the user to result screen
     final navigator = Navigator.of(context);
 
     try {
-      //obtain picture from camera
       final pictureFile = await _cameraController!.takePicture();
 
       final file = File(pictureFile.path);
 
       final inputImage = InputImage.fromFile(file);
 
-      final recognizedText =
-          await textRecognizer.processImage(inputImage); //google ml kit
+      // final recognizedText =
+      //     await textRecognizer.processImage(inputImage); //google ml kit
 
-      await navigator.push(
-        MaterialPageRoute(
-          builder: (BuildContext context) =>
-              ResultScreen(textstring: recognizedText.text),
-        ),
-      );
+      // await navigator.push(
+      //   MaterialPageRoute(
+      //     builder: (BuildContext context) =>
+      //         ResultScreen(textstring: recognizedText.text),
+      //   ),
+      // );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
