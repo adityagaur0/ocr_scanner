@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -8,7 +7,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -79,54 +77,59 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         //we added scaffold behind the stack because,
         //empty bands will be seen around it,
         //considering the camera has same aspect ratio as mobile
-        return Stack(
-          children: [
-            if (_isPermissionGranted)
-              FutureBuilder<List<CameraDescription>>(
-                future: availableCameras(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    _initCameraController(snapshot.data!);
+        return GestureDetector(
+          onTap: _scanImage,
+          child: Stack(
+            children: [
+              if (_isPermissionGranted)
+                FutureBuilder<List<CameraDescription>>(
+                  future: availableCameras(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      _initCameraController(snapshot.data!);
 
-                    return Center(child: CameraPreview(_cameraController!));
-                  } else {
-                    return const LinearProgressIndicator(); // to show camera is not granted
-                  }
-                },
-              ),
-            Scaffold(
-              appBar: AppBar(
-                title: const Text('Text Recognition Sample'),
-              ),
-              backgroundColor: _isPermissionGranted ? Colors.transparent : null,
-              body: _isPermissionGranted
-                  ? Column(
-                      children: [
-                        Expanded(
-                          child: Container(),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(bottom: 30.0),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: _scanImage,
-                              child: const Text('Scan text'),
-                            ),
+                      return Center(child: CameraPreview(_cameraController!));
+                    } else {
+                      return const LinearProgressIndicator(); // to show camera is not granted
+                    }
+                  },
+                ),
+              Scaffold(
+                appBar: AppBar(
+                  title: const Text('Text Recognition Sample'),
+                ),
+                backgroundColor:
+                    _isPermissionGranted ? Colors.transparent : null,
+                body: _isPermissionGranted
+                    ? Column(
+                        children: [
+                          Expanded(
+                            child: Container(),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.only(bottom: 30.0),
+                            child: Center(
+                                // child: ElevatedButton(
+                                //   onPressed: _scanImage,
+                                //   child: const Text('Scan text'),
+                                // ),
+                                ),
+                          ),
+                        ],
+                      )
+                    : Center(
+                        child: Container(
+                          padding:
+                              const EdgeInsets.only(left: 24.0, right: 24.0),
+                          child: const Text(
+                            'Camera permission denied',
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                      ],
-                    )
-                  : Center(
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 24.0, right: 24.0),
-                        child: const Text(
-                          'Camera permission denied',
-                          textAlign: TextAlign.center,
-                        ),
                       ),
-                    ),
-            ),
-          ],
+              ),
+            ],
+          ),
         );
       },
     );
