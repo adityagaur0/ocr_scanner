@@ -67,6 +67,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  bool _isAutoScanning = false;
+
   @override
   Widget build(BuildContext context) {
     //future builder will execute the future that will request the permission in the beigining.
