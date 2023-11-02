@@ -67,8 +67,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  bool _isAutoScanning = false;
-
   @override
   Widget build(BuildContext context) {
     //future builder will execute the future that will request the permission in the beigining.
@@ -230,11 +228,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ResultScreen(textstring: recognizedText.text),
         ),
       );
-      if (_isAutoScanning) {
-        // If auto-scanning is enabled, call the method again with a delay.
-        await Future.delayed(Duration(seconds: 5));
-        _scanImage();
-      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
