@@ -228,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
           if (confidence > 0.5) {
             recognizedCurrency =
-                label; // Use the label as the recognized currency
+                label[1]; // Use the label as the recognized currency
             break;
           }
         }
