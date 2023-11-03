@@ -220,14 +220,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     String recognizedCurrency = ''; // Initialize the recognized currency
 
-    // Process the recognitions to extract the currency value
-    for (var recognition in recognitions!) {
-      String label = recognition['label'];
-      double confidence = recognition['confidence'];
+    if (recognitions != null) {
+      for (var recognition in recognitions) {
+        if (recognition != null) {
+          String label = recognition['label'];
+          double confidence = recognition['confidence'];
 
-      if (confidence > 0.5) {
-        recognizedCurrency = label; // Use the label as the recognized currency
-        break;
+          if (confidence > 0.5) {
+            recognizedCurrency =
+                label; // Use the label as the recognized currency
+            break;
+          }
+        }
       }
     }
 
