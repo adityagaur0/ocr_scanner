@@ -22,6 +22,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // future will be executed first to request the permission.
   late final Future<void> _future;
   CameraController? _cameraController;
+  var _recognitions;
+  var v = "";
 
   @override
   void initState() {
@@ -182,12 +184,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       final inputImage = InputImage.fromFile(file);
 
-      // await navigator.push(
-      //   MaterialPageRoute(
-      //     builder: (BuildContext context) =>
-      //         ResultScreen(textstring: recognizedText.text),
-      //   ),
-      // );
+      // Detect currency using TensorFlow Lite
+      String recognizedCurrency = await detectCurrency(file);
+
+      await navigator.push(
+        MaterialPageRoute(
+          builder: (BuildContext context) =>
+              ResultScreen(textstring: recognizedCurrency),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -203,4 +208,51 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       labels: "assets/ML/labels.txt",
     );
   }
+
+  Future<String> detectCurrency(File image) async {
+    var recognitions = await Tflite.runModelOnImage(
+      path: image.path,
+      numResults: 6,
+      threshold: 0.05,
+      imageMean: 127.5,
+      imageStd: 127.5,
+    );
+
+    String recognizedCurrency = ''; // Initialize the recognized currency
+
+    // Process the recognitions to extract the currency value
+    for (var recognition in recognitions!) {
+      String label = recognition['label'];
+      double confidence = recognition['confidence'];
+
+      if (confidence > 0.5) {
+        recognizedCurrency = label; // Use the label as the recognized currency
+        break;
+      }
+    }
+
+    return recognizedCurrency;
+  }
+
+  // Future detectimage(File image) async {
+  //   int startTime = new DateTime.now().millisecondsSinceEpoch;
+  //   var recognitions = await Tflite.runModelOnImage(
+  //     path: image.path,
+  //     numResults: 6,
+  //     threshold: 0.05,
+  //     imageMean: 127.5,
+  //     imageStd: 127.5,
+  //   );
+  //   setState(() {
+  //     _recognitions = recognitions;
+  //     v = recognitions.toString();
+  //     // dataList = List<Map<String, dynamic>>.from(jsonDecode(v));
+  //   });
+  //   print("//////////////////////////////////////////////////");
+  //   print(_recognitions);
+  //   // print(dataList);
+  //   print("//////////////////////////////////////////////////");
+  //   int endTime = new DateTime.now().millisecondsSinceEpoch;
+  //   print("Inference took ${endTime - startTime}ms");
+  // }
 }
