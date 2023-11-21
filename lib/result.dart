@@ -37,7 +37,7 @@ class ResultScreen extends StatelessWidget {
             SizedBox(
               height: 20,
             ),
-            Text(text),
+            // Text(text),
           ],
         ),
       ),
