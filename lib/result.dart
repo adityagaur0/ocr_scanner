@@ -7,31 +7,21 @@ class ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> resultMessages = [];
+    String resultMessage = '';
 
     if (text.contains("500\n")) {
-      resultMessages.add("Yes for 500");
+      resultMessage = "Yes for 500";
+    } else if (text.contains("100\n")) {
+      resultMessage = "Yes for 100";
+    } else if (text.contains("10\n")) {
+      resultMessage = "Yes for 10";
+    } else if (text.contains("50\n")) {
+      resultMessage = "Yes for 50";
+    } else if (text.contains("200\n")) {
+      resultMessage = "Yes for 200";
+    } else {
+      resultMessage = "Condition not met";
     }
-
-    if (text.contains("100\n")) {
-      resultMessages.add("Yes for 100");
-    }
-
-    if (text.contains("10\n")) {
-      resultMessages.add("Yes for 10");
-    }
-
-    if (text.contains("50\n")) {
-      resultMessages.add("Yes for 50");
-    }
-
-    if (text.contains("200\n")) {
-      resultMessages.add("Yes for 200");
-    }
-
-    String resultMessage = resultMessages.isNotEmpty
-        ? resultMessages.join(", ") // Join messages if there are any
-        : "Condition not met";
 
     return Scaffold(
       appBar: AppBar(
