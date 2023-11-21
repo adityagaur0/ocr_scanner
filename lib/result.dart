@@ -18,7 +18,7 @@ class ResultScreen extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(30.0),
-              child: text.contains("100\n") ? Text("yes") : Text("No"),
+              child: text.contains("500\n") ? Text("yes") : Text("No"),
             ),
             SizedBox(
               height: 20,
