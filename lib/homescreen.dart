@@ -1,233 +1,204 @@
-// import 'dart:io';
-// import 'package:camera/camera.dart';
-// import 'package:flutter/material.dart';
-// import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-// import 'package:ocr_scanner/result.dart';
-// import 'package:permission_handler/permission_handler.dart';
-// import 'package:tflite_v2/tflite_v2.dart';
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+import 'package:ocr_scanner/main.dart';
 
-// class HomeScreen extends StatefulWidget {
-//   const HomeScreen({super.key});
-//   @override
-//   State<HomeScreen> createState() => _HomeScreenState();
-// }
+// import 'package:get/get.dart';
+import 'package:tflite_v2/tflite_v2.dart';
 
-// // widgetbindingObserver:  to display camera feed in our app ,we will need to have control of the lifecycle
-// // of our main widget
+class Home extends StatefulWidget {
+  const Home({super.key});
 
-// class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-//   //to manage the the permission to camera is granted.
-//   bool _isPermissionGranted = false;
+  @override
+  State<Home> createState() => _HomeState();
+}
 
-//   // future will be executed first to request the permission.
-//   late final Future<void> _future;
-//   CameraController? _cameraController;
-//   var _recognitions;
-//   var v = "";
+class _HomeState extends State<Home> {
+  bool isWorking = false;
+  String result = "";
+  CameraController? cameraController;
+  CameraImage? imgCamera;
 
-//   @override
-//   void initState() {
-//     // TODO: implement initState
-//     super.initState();
-//     WidgetsBinding.instance.addObserver(this);
-//     _future = _requestCameraPermission();
-//     loadmodel().then((value) {
-//       setState(() {});
-//     });
-//   }
+  initCamera() {
+    cameraController = CameraController(cameras![0], ResolutionPreset.medium);
+    cameraController!.initialize().then((value) {
+      if (!mounted) {
+        return;
+      }
 
-//   @override
-//   void dispose() {
-//     WidgetsBinding.instance.removeObserver(this);
-//     _stopCamera();
-//     super.dispose();
-//   }
+      setState(() {
+        cameraController!.startImageStream((imageFromStream) => {
+              if (!isWorking)
+                {
+                  isWorking = true,
+                  imgCamera = imageFromStream,
+                  runModelonStreamFrames(),
+                }
+            });
+      });
+    });
+  }
 
-//   @override
-//   void didChangeAppLifecycleState(AppLifecycleState state) {
-//     if (_cameraController == null || !_cameraController!.value.isInitialized) {
-//       return;
-//     }
-//     if (state == AppLifecycleState.inactive) {
-//       _stopCamera();
-//     } else if (state == AppLifecycleState.resumed &&
-//         _cameraController != null &&
-//         _cameraController!.value.isInitialized) {
-//       _startCamera();
-//     }
-//   }
+  loadModel() async {
+    await Tflite.loadModel(
+      model: "assets/model_unquant.tflite",
+      labels: "assets/labels.txt",
+    );
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return FutureBuilder(
-//       future: _future,
-//       builder: (context, snapshot) {
-//         return GestureDetector(
-//           onTap: _scanImage,
-//           child: Stack(
-//             children: [
-//               if (_isPermissionGranted)
-//                 FutureBuilder<List<CameraDescription>>(
-//                   future: availableCameras(),
-//                   builder: (context, snapshot) {
-//                     if (snapshot.hasData) {
-//                       _initCameraController(snapshot.data!);
+  @override
+  void dispose() async {
+    // TODO: implement dispose
+    super.dispose();
 
-//                       return Center(child: CameraPreview(_cameraController!));
-//                     } else {
-//                       return const LinearProgressIndicator(); // to show camera is not granted
-//                     }
-//                   },
-//                 ),
-//               Scaffold(
-//                 appBar: AppBar(
-//                   title: const Text('Text Recognition Sample'),
-//                 ),
-//                 backgroundColor:
-//                     _isPermissionGranted ? Colors.transparent : null,
-//                 body: _isPermissionGranted
-//                     ? Column(
-//                         children: [
-//                           Expanded(
-//                             child: Container(),
-//                           ),
-//                           Container(
-//                             padding: const EdgeInsets.only(bottom: 30.0),
-//                             child: Center(
-//                               child: ElevatedButton(
-//                                 onPressed: _scanImage,
-//                                 child: const Text('Scan text'),
-//                               ),
-//                             ),
-//                           ),
-//                         ],
-//                       )
-//                     : Center(
-//                         child: Container(
-//                           padding:
-//                               const EdgeInsets.only(left: 24.0, right: 24.0),
-//                           child: const Text(
-//                             'Camera permission denied',
-//                             textAlign: TextAlign.center,
-//                           ),
-//                         ),
-//                       ),
-//               ),
-//             ],
-//           ),
-//         );
-//       },
-//     );
-//   }
+    await Tflite.close();
+    cameraController?.dispose();
+  }
 
-//   Future<void> _requestCameraPermission() async {
-//     final status = await Permission.camera.request();
-//     _isPermissionGranted = status == PermissionStatus.granted;
-//   }
+  @override
+  void initState() {
+    super.initState();
+    loadModel();
+  }
 
-//   void _startCamera() {
-//     if (_cameraController != null) {
-//       _cameraSelected(_cameraController!.description);
-//     }
-//   }
+  runModelonStreamFrames() async {
+    if (imgCamera != null) {
+      var recognitions = await Tflite.runModelOnFrame(
+        bytesList: imgCamera!.planes.map((plane) {
+          return plane.bytes;
+        }).toList(),
+        imageHeight: imgCamera!.height,
+        imageWidth: imgCamera!.width,
+        imageMean: 127.5,
+        imageStd: 127.5,
+        rotation: 90,
+        numResults: 2,
+        threshold: 0.1,
+        asynch: true,
+      );
+      result = '';
 
-//   void _stopCamera() {
-//     if (_cameraController != null) {
-//       _cameraController?.dispose();
-//     }
-//   }
+      recognitions!.forEach((response) {
+        // print(response);
+        result += response["label"] +
+            (response["confidence"] as double).toStringAsFixed(2);
+      });
 
-//   void _initCameraController(List<CameraDescription> cameras) {
-//     if (_cameraController != null) {
-//       return;
-//     }
+      // showModalBottomSheet(
+      //     context: context,
+      //     builder: (ctx) => Result(result: result),
+      //     isScrollControlled: true);
+      setState(() {
+        result;
+      });
 
-//     CameraDescription? camera;
-//     for (var i = 0; i < cameras.length; i++) {
-//       final CameraDescription current = cameras[i];
-//       if (current.lensDirection == CameraLensDirection.back) {
-//         camera = current;
-//         break;
-//       }
-//     }
+      print(result);
 
-//     if (camera != null) {
-//       _cameraSelected(camera);
-//     }
-//   }
+      isWorking = false;
+    }
+  }
 
-//   Future<void> _cameraSelected(CameraDescription camera) async {
-//     _cameraController = CameraController(
-//       camera,
-//       ResolutionPreset.max,
-//       enableAudio: false,
-//     );
-
-//     await _cameraController!.initialize();
-//     await _cameraController!.setFlashMode(FlashMode.off);
-
-//     if (!mounted) {
-//       return;
-//     }
-//     setState(() {});
-//   }
-
-//   Future<void> _scanImage() async {
-//     if (_cameraController == null) return;
-
-//     final navigator = Navigator.of(context);
-
-//     try {
-//       final pictureFile = await _cameraController!.takePicture();
-
-//       final file = File(pictureFile.path);
-
-//       final inputImage = InputImage.fromFile(file);
-
-//       // Detect currency using TensorFlow Lite
-//       String recognizedCurrency = await detectCurrency(file);
-
-//       await navigator.push(
-//         MaterialPageRoute(
-//           builder: (BuildContext context) =>
-//               ResultScreen(textstring: recognizedCurrency),
-//         ),
-//       );
-//     } catch (e) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(
-//           content: Text('An error occurred when scanning text'),
-//         ),
-//       );
-//     }
-//   }
-
-//   loadmodel() async {
-//     await Tflite.loadModel(
-//       model: "assets/model_unquant.tflite",
-//       labels: "assets/labels.txt",
-//     );
-//   }
-
-//   Future detectimage(File image) async {
-//     int startTime = new DateTime.now().millisecondsSinceEpoch;
-//     var recognitions = await Tflite.runModelOnImage(
-//       path: image.path,
-//       numResults: 6,
-//       threshold: 0.05,
-//       imageMean: 127.5,
-//       imageStd: 127.5,
-//     );
-//     setState(() {
-//       _recognitions = recognitions;
-//       v = recognitions.toString();
-//       // dataList = List<Map<String, dynamic>>.from(jsonDecode(v));
-//     });
-//     print("//////////////////////////////////////////////////");
-//     print(_recognitions);
-//     // print(dataList);
-//     print("//////////////////////////////////////////////////");
-//     int endTime = new DateTime.now().millisecondsSinceEpoch;
-//     print("Inference took ${endTime - startTime}ms");
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(15, 60, 15, 5),
+              child: Text(
+                "Dogs Breed Recognizer",
+                style: TextStyle(
+                  fontSize: 28,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Container(
+              decoration: const BoxDecoration(
+                  // image: DecorationImage(
+                  //     image: AssetImage("assets/back.jpg"), fit: BoxFit.fill),
+                  color: Colors.black),
+              child: Center(
+                child: Column(
+                  children: [
+                    Stack(
+                      children: [
+                        // Center(
+                        //   child: Container(
+                        //     height: 320,
+                        //     width: 360,
+                        //     child: Image.asset("assets/frame.jpg"),
+                        //   ),
+                        // ),
+                        Center(
+                          child: TextButton(
+                            onPressed: () {
+                              initCamera();
+                            },
+                            child: Container(
+                              // margin: EdgeInsets.only(top: 35.0),
+                              height: 720.0,
+                              width: 720.0,
+                              child: imgCamera == null
+                                  ? Container(
+                                      height: 270.0,
+                                      width: 360.0,
+                                      child: Icon(
+                                        Icons.photo_camera_front_rounded,
+                                        color: Colors.white,
+                                        size: 40.0,
+                                      ),
+                                    )
+                                  : AspectRatio(
+                                      aspectRatio:
+                                          cameraController!.value.aspectRatio,
+                                      child: CameraPreview(cameraController!),
+                                    ),
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 55.0),
+                            child: SingleChildScrollView(
+                              child: Text(
+                                result,
+                                style: const TextStyle(
+                                  backgroundColor: Colors.white54,
+                                  fontSize: 25.0,
+                                  color: Colors.black,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    // Center(
+                    //   child: Container(
+                    //     margin: const EdgeInsets.only(top: 55.0),
+                    //     child: SingleChildScrollView(
+                    //       child: Text(
+                    //         result,
+                    //         style: const TextStyle(
+                    //           backgroundColor: Colors.white54,
+                    //           fontSize: 25.0,
+                    //           color: Colors.black,
+                    //         ),
+                    //         textAlign: TextAlign.center,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // )
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
