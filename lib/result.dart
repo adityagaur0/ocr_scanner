@@ -26,7 +26,7 @@ class ResultScreen extends StatelessWidget {
           text,
           style: TextStyle(
             fontSize: text.length == 3
-                ? 24.0
+                ? 40
                 : 16.0, // Adjust font size based on length
           ),
         ),
