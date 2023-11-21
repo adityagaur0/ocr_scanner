@@ -8,6 +8,12 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Call the method to show text based on the condition
+    bool _isNumeric(String s) {
+      if (s == null) {
+        return false;
+      }
+      return double.tryParse(s) != null;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -18,7 +24,9 @@ class ResultScreen extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(30.0),
-              child: text.contains("10") ? Text("yes") : Text("No"),
+              child: _isNumeric(text) && int.parse(text) <= 100
+                  ? Text("yes")
+                  : Text("No"),
             ),
             SizedBox(
               height: 20,
