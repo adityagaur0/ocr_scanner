@@ -13,9 +13,19 @@ class ResultScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Result'),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(30.0),
-        child: text.contains("100") ? Text("yes") : Text("No"),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(30.0),
+              child: text.contains("100") ? Text("yes") : Text("No"),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(text),
+          ],
+        ),
       ),
     );
   }
