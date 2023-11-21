@@ -15,7 +15,7 @@ class ResultScreen extends StatelessWidget {
       ),
       body: Container(
         padding: const EdgeInsets.all(30.0),
-        child: text.length == 3 ? Text(text) : Container(),
+        child: Text(text),
       ),
     );
   }
