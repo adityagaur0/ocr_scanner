@@ -16,6 +16,8 @@ dependencies:
   google_mlkit_text_recognition: ^0.10.0
   flutter_tts: ^3.8.3
   tflite_v2: ^1.0.0
+  path_provider: ^2.1.1
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:
@@ -27,5 +29,5 @@ flutter:
 
   uses-material-design: true
   assets:
-    - assets/ML/model_unquant.tflite
-    - assets/ML/labels.txt
+    - assets/labels.txt
+    - assets/model_unquant.tflite
