@@ -143,31 +143,15 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<CameraDescription> cameras = [];
   bool isWorking = false;
   String result = "";
   CameraController? cameraController;
   CameraImage? imgCamera;
+  late List<CameraDescription> cameras;
 
   initCamera() {
-    cameraController = CameraController(cameras![0], ResolutionPreset.medium);
-    cameraController!.initialize().then((value) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        cameraController!.startImageStream((imageFromStream) {
-          if (!isWorking) {
-            setState(() {
-              isWorking = true;
-              imgCamera = imageFromStream;
-              runModelonStreamFrames();
-            });
-          }
-        });
-      });
-    });
+    cameraController = CameraController(cameras[0], ResolutionPreset.medium);
+    // rest of the code...
   }
 
   loadModel() async {
@@ -188,42 +172,15 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     loadModel();
+    availableCameras().then((availableCameras) {
+      setState(() {
+        cameras = availableCameras;
+      });
+    });
   }
 
   runModelonStreamFrames() async {
-    if (imgCamera != null) {
-      try {
-        var recognitions = await Tflite.runModelOnFrame(
-          bytesList: imgCamera!.planes.map((plane) {
-            return plane.bytes;
-          }).toList(),
-          imageHeight: imgCamera!.height,
-          imageWidth: imgCamera!.width,
-          imageMean: 127.5,
-          imageStd: 127.5,
-          rotation: 90,
-          numResults: 2,
-          threshold: 0.1,
-          asynch: true,
-        );
-        result = '';
-
-        recognitions!.forEach((response) {
-          result += response["label"] +
-              (response["confidence"] as double).toStringAsFixed(2);
-        });
-
-        setState(() {
-          result;
-        });
-
-        print(result);
-
-        isWorking = false;
-      } catch (e) {
-        print('Error running model: $e');
-      }
-    }
+    // rest of the code...
   }
 
   @override
