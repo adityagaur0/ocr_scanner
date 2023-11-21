@@ -15,7 +15,7 @@ class ResultScreen extends StatelessWidget {
       ),
       body: Container(
         padding: const EdgeInsets.all(30.0),
-        child: Text(text),
+        child: text.contains("100") ? Text("yes") : Text("No"),
       ),
     );
   }
