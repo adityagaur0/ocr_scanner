@@ -6,6 +6,7 @@ import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:ocr_scanner/camera/camera_helper.dart';
 import 'package:ocr_scanner/recognition/utils.dart';
+import 'package:ocr_scanner/results/object_recognition_result.dart';
 import 'package:ocr_scanner/results/read_text_result_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -150,6 +151,36 @@ class _TextRecognitionScreenState extends State<TextRecognitionScreen> {
               widget.resultPageBuilder(recognizedText.text),
         ),
       );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred when scanning text'),
+        ),
+      );
+    }
+  }
+    Future<void> _detectObject() async {
+    if (_cameraManager.cameraController == null) return;
+
+    final navigator = Navigator.of(context);
+
+    try {
+      final pictureFile = await _cameraManager.cameraController!.takePicture();
+
+      final file = File(pictureFile.path);
+
+      final inputImage = InputImage.fromFile(file);
+
+      //final recognizedText = await textRecognizer.processImage(inputImage);
+      final labels = await _imageLabeler.processImage(inputImage);
+      for (final label in labels) {
+        await navigator.push(
+          MaterialPageRoute(
+            builder: (BuildContext context) =>
+                ObjectResultScreen(text: label.label),
+          ),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
