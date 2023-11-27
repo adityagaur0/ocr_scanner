@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ocr_scanner/recognition/combined_recognition.dart';
 import 'package:ocr_scanner/recognition/object_recognition.dart';
 import 'package:ocr_scanner/recognition/text_recognition.dart';
 import 'package:ocr_scanner/results/currency_recognition_result.dart';
+import 'package:ocr_scanner/results/object_recognition_result.dart';
 import 'package:ocr_scanner/results/read_text_result_screen.dart';
 import 'package:ocr_scanner/screens/roughscreen.dart';
 
@@ -21,7 +23,7 @@ class _HomeState extends State<Home> {
         resultPageBuilder: (text) => ResultScreen(text: text)),
     TextRecognitionScreen(
         resultPageBuilder: (text) => ResultCurrencyScreen(text: text)),
-    ObjectRecognitionScreen(),
+    CombinedRecognitionScreen(resultPageBuilder: (text) =>ObjectResultScreen(text: text), recognitionType: RecognitionType.Object)
     // const CanvasScreen(),
     // const ProductScannerScreen(),
     // const ObjectRecognitionScreen(),
