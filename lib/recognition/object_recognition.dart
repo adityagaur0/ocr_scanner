@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:ocr_scanner/camera/camera_helper.dart';
+import 'package:ocr_scanner/results/object_recognition_result.dart';
 import 'package:ocr_scanner/results/read_text_result_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ObjectRecognitionScreen extends StatefulWidget {
-  const ObjectRecognitionScreen({super.key, required this.resultPageBuilder});
-  final Widget Function(String text) resultPageBuilder;
+  const ObjectRecognitionScreen({super.key});
+  // final Widget Function(String text) resultPageBuilder;
 
   @override
   State<ObjectRecognitionScreen> createState() =>
@@ -118,7 +119,7 @@ class _ObjectRecognitionScreenState extends State<ObjectRecognitionScreen> {
         await navigator.push(
           MaterialPageRoute(
             builder: (BuildContext context) =>
-                widget.resultPageBuilder(label.label),
+                ObjectResultScreen(text: label.label),
           ),
         );
       }

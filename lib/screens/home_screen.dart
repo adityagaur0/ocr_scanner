@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ocr_scanner/recognition/object_recognition.dart';
 import 'package:ocr_scanner/recognition/text_recognition.dart';
 import 'package:ocr_scanner/results/currency_recognition_result.dart';
 import 'package:ocr_scanner/results/read_text_result_screen.dart';
@@ -20,7 +21,7 @@ class _HomeState extends State<Home> {
         resultPageBuilder: (text) => ResultScreen(text: text)),
     TextRecognitionScreen(
         resultPageBuilder: (text) => ResultCurrencyScreen(text: text)),
-    const RoughScreen(),
+    ObjectRecognitionScreen(),
     // const CanvasScreen(),
     // const ProductScannerScreen(),
     // const ObjectRecognitionScreen(),
@@ -32,8 +33,6 @@ class _HomeState extends State<Home> {
       currentIndex = index;
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
