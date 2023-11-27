@@ -11,10 +11,12 @@ import 'package:ocr_scanner/results/read_text_result_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class CombinedRecognitionScreen extends StatefulWidget {
-  const CombinedRecognitionScreen(
-      {super.key,
-      required this.resultPageBuilder,
-      required this.recognitionType});
+  const CombinedRecognitionScreen({
+    Key? key, // Added the 'Key?' parameter
+    required this.resultPageBuilder,
+    required this.recognitionType,
+  }) : super(key: key);
+
   final Widget Function(String text) resultPageBuilder;
   final RecognitionType recognitionType;
 
@@ -36,7 +38,7 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
   void initState() {
     super.initState();
     _cameraManager = CameraManager(() {
-      setState(() {}); // Trigger the state update in CombinedRecognitionScreen
+      setState(() {});
     });
     _initializeLabeler();
   }
@@ -124,7 +126,8 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
     final navigator = Navigator.of(context);
 
     try {
-      final pictureFile = await _cameraManager.cameraController!.takePicture();
+      final pictureFile =
+          await _cameraManager.cameraController!.takePicture();
 
       final file = File(pictureFile.path);
 
@@ -148,27 +151,10 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
   }
 
   void _initializeLabeler() async {
-    // uncomment next line if you want to use the default model
-    // _imageLabeler = ImageLabeler(options: ImageLabelerOptions());
-
-    // uncomment next lines if you want to use a local model
-    // make sure to add tflite model to assets/ml
-    // final path = 'assets/ml/lite-model_aiy_vision_classifier_birds_V1_3.tflite';
-    // final path = 'assets/ml/object_labeler_flowers.tflite';
     final path = 'assets/object_labeler.tflite';
     final modelPath = await getAssetPath(path);
     final options = LocalLabelerOptions(modelPath: modelPath);
     _imageLabeler = ImageLabeler(options: options);
-
-    // uncomment next lines if you want to use a remote model
-    // make sure to add model to firebase
-    // final modelName = 'bird-classifier';
-    // final response =
-    //     await FirebaseImageLabelerModelManager().downloadModel(modelName);
-    // print('Downloaded: $response');
-    // final options =
-    //     FirebaseLabelerOption(confidenceThreshold: 0.5, modelName: modelName);
-    // _imageLabeler = ImageLabeler(options: options);
 
     _canProcess = true;
   }
@@ -179,7 +165,8 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
     final navigator = Navigator.of(context);
 
     try {
-      final pictureFile = await _cameraManager.cameraController!.takePicture();
+      final pictureFile =
+          await _cameraManager.cameraController!.takePicture();
 
       final file = File(pictureFile.path);
 
@@ -191,7 +178,6 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
         _text = '';
       });
 
-      //final recognizedText = await textRecognizer.processImage(inputImage);
       final labels = await _imageLabeler.processImage(inputImage);
       String text = 'Labels found: ${labels.length}\n\n';
       for (final label in labels) {
@@ -201,7 +187,8 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
       _text = text;
       await navigator.push(
         MaterialPageRoute(
-          builder: (BuildContext context) => ObjectResultScreen(text: text),
+          builder: (BuildContext context) =>
+              ObjectResultScreen(text: text),
         ),
       );
     } catch (e) {
