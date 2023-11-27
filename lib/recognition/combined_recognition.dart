@@ -19,7 +19,8 @@ class CombinedRecognitionScreen extends StatefulWidget {
   final RecognitionType recognitionType;
 
   @override
-  State<CombinedRecognitionScreen> createState() => _CombinedRecognitionScreenState();
+  State<CombinedRecognitionScreen> createState() =>
+      _CombinedRecognitionScreenState();
 }
 
 class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
@@ -28,6 +29,8 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
   bool _isCameraInitializing = false;
   late ImageLabeler _imageLabeler;
   bool _canProcess = false;
+  String? _text;
+  bool _isBusy = false;
 
   @override
   void initState() {
@@ -181,17 +184,26 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
       final file = File(pictureFile.path);
 
       final inputImage = InputImage.fromFile(file);
+      if (!_canProcess) return;
+      if (_isBusy) return;
+      _isBusy = true;
+      setState(() {
+        _text = '';
+      });
 
       //final recognizedText = await textRecognizer.processImage(inputImage);
       final labels = await _imageLabeler.processImage(inputImage);
+      String text = 'Labels found: ${labels.length}\n\n';
       for (final label in labels) {
-        await navigator.push(
-          MaterialPageRoute(
-            builder: (BuildContext context) =>
-                ObjectResultScreen(text: label.label),
-          ),
-        );
+        text += 'Label: ${label.label}, '
+            'Confidence: ${label.confidence.toStringAsFixed(2)}\n\n';
       }
+      _text = text;
+      await navigator.push(
+        MaterialPageRoute(
+          builder: (BuildContext context) => ObjectResultScreen(text: text),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
