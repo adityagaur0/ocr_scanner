@@ -126,8 +126,7 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
     final navigator = Navigator.of(context);
 
     try {
-      final pictureFile =
-          await _cameraManager.cameraController!.takePicture();
+      final pictureFile = await _cameraManager.cameraController!.takePicture();
 
       final file = File(pictureFile.path);
 
@@ -165,8 +164,7 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
     final navigator = Navigator.of(context);
 
     try {
-      final pictureFile =
-          await _cameraManager.cameraController!.takePicture();
+      final pictureFile = await _cameraManager.cameraController!.takePicture();
 
       final file = File(pictureFile.path);
 
@@ -187,10 +185,13 @@ class _CombinedRecognitionScreenState extends State<CombinedRecognitionScreen> {
       _text = text;
       await navigator.push(
         MaterialPageRoute(
-          builder: (BuildContext context) =>
-              ObjectResultScreen(text: text),
+          builder: (BuildContext context) => ObjectResultScreen(text: text),
         ),
       );
+      _isBusy = false;
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
