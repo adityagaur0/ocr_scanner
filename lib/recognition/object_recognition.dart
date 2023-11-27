@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:ocr_scanner/camera/camera_helper.dart';
 import 'package:ocr_scanner/results/read_text_result_screen.dart';
@@ -12,13 +13,15 @@ class ObjectRecognitionScreen extends StatefulWidget {
   final Widget Function(String text) resultPageBuilder;
 
   @override
-  State<ObjectRecognitionScreen> createState() => _ObjectRecognitionScreenState();
+  State<ObjectRecognitionScreen> createState() =>
+      _ObjectRecognitionScreenState();
 }
 
 class _ObjectRecognitionScreenState extends State<ObjectRecognitionScreen> {
   final textRecognizer = TextRecognizer();
   late final CameraManager _cameraManager;
   bool _isCameraInitializing = false;
+  late ImageLabeler _imageLabeler;
 
   @override
   void initState() {
@@ -109,14 +112,16 @@ class _ObjectRecognitionScreenState extends State<ObjectRecognitionScreen> {
 
       final inputImage = InputImage.fromFile(file);
 
-      final recognizedText = await textRecognizer.processImage(inputImage);
-
-      await navigator.push(
-        MaterialPageRoute(
-          builder: (BuildContext context) =>
-              widget.resultPageBuilder(recognizedText.text),
-        ),
-      );
+      //final recognizedText = await textRecognizer.processImage(inputImage);
+      final labels = await _imageLabeler.processImage(inputImage);
+      for (final label in labels) {
+        await navigator.push(
+          MaterialPageRoute(
+            builder: (BuildContext context) =>
+                widget.resultPageBuilder(label.label),
+          ),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
