@@ -33,24 +33,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-  // void _openHelpOverlay() {
-  //   //   6**************
-  //   if (currentIndex == 0) {
-  //     showModalBottomSheet(
-  //       useSafeArea: true,
-  //       isScrollControlled: false,
-  //       context: context,
-  //       builder: (ctx) => const TextReadHelp(),
-  //     );
-  //   } else if (currentIndex == 1) {
-  //     showModalBottomSheet(
-  //       useSafeArea: true,
-  //       isScrollControlled: false,
-  //       context: context,
-  //       builder: (ctx) => const CurrencyScreenHelp(),
-  //     );
-  //   }
-  // }
+
 
   @override
   Widget build(BuildContext context) {
@@ -82,8 +65,7 @@ class _HomeState extends State<Home> {
                 icon: Icon(Icons.text_fields_sharp), label: ''),
             BottomNavigationBarItem(
                 icon: Icon(Icons.currency_rupee_rounded), label: ''),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.currency_rupee_rounded), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.data_object), label: ''),
             //          BottomNavigationBarItem(icon: Icon(Icons.draw_outlined), label: ''),
             //        BottomNavigationBarItem(
             //          icon: Icon(Icons.qr_code_scanner), label: ''),
