@@ -19,11 +19,11 @@ class _HomeState extends State<Home> {
   bool helpOverlayShown = false;
 
   List pages = [
-    TextRecognitionScreen(
-        resultPageBuilder: (text) => ResultScreen(text: text)),
-    TextRecognitionScreen(
-        resultPageBuilder: (text) => ResultCurrencyScreen(text: text)),
-    CombinedRecognitionScreen(resultPageBuilder: (text) =>ObjectResultScreen(text: text), recognitionType: RecognitionType.Object)
+    CombinedRecognitionScreen(
+        resultPageBuilder: (text) => ResultScreen(text: text),recognitionType: RecognitionType.Text),
+    CombinedRecognitionScreen(
+        resultPageBuilder: (text) => ResultCurrencyScreen(text: text),recognitionType: RecognitionType.Text),
+    CombinedRecognitionScreen(resultPageBuilder: (text) =>ObjectResultScreen(text: text), recognitionType: RecognitionType.Object),
     // const CanvasScreen(),
     // const ProductScannerScreen(),
     // const ObjectRecognitionScreen(),
