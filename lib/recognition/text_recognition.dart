@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:ocr_scanner/camera/camera_helper.dart';
+import 'package:ocr_scanner/recognition/utils.dart';
 import 'package:ocr_scanner/results/read_text_result_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -19,6 +21,8 @@ class _TextRecognitionScreenState extends State<TextRecognitionScreen> {
   final textRecognizer = TextRecognizer();
   late final CameraManager _cameraManager;
   bool _isCameraInitializing = false;
+  late ImageLabeler _imageLabeler;
+  bool _canProcess = false;
 
   @override
   void initState() {
@@ -26,11 +30,14 @@ class _TextRecognitionScreenState extends State<TextRecognitionScreen> {
     _cameraManager = CameraManager(() {
       setState(() {}); // Trigger the state update in TextRecognitionScreen
     });
+    _initializeLabeler();
   }
 
   @override
   void dispose() {
     _cameraManager.dispose();
+    _canProcess = false;
+    _imageLabeler.close();
     textRecognizer.close();
     super.dispose();
   }
@@ -95,6 +102,32 @@ class _TextRecognitionScreenState extends State<TextRecognitionScreen> {
         );
       },
     );
+  }
+
+  void _initializeLabeler() async {
+    // uncomment next line if you want to use the default model
+    // _imageLabeler = ImageLabeler(options: ImageLabelerOptions());
+
+    // uncomment next lines if you want to use a local model
+    // make sure to add tflite model to assets/ml
+    // final path = 'assets/ml/lite-model_aiy_vision_classifier_birds_V1_3.tflite';
+    // final path = 'assets/ml/object_labeler_flowers.tflite';
+    final path = 'assets/object_labeler.tflite';
+    final modelPath = await getAssetPath(path);
+    final options = LocalLabelerOptions(modelPath: modelPath);
+    _imageLabeler = ImageLabeler(options: options);
+
+    // uncomment next lines if you want to use a remote model
+    // make sure to add model to firebase
+    // final modelName = 'bird-classifier';
+    // final response =
+    //     await FirebaseImageLabelerModelManager().downloadModel(modelName);
+    // print('Downloaded: $response');
+    // final options =
+    //     FirebaseLabelerOption(confidenceThreshold: 0.5, modelName: modelName);
+    // _imageLabeler = ImageLabeler(options: options);
+
+    _canProcess = true;
   }
 
   Future<void> _scanImage() async {
