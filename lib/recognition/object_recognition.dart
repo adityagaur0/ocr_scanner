@@ -32,11 +32,14 @@ class _ObjectRecognitionScreenState extends State<ObjectRecognitionScreen> {
     _cameraManager = CameraManager(() {
       setState(() {}); // Trigger the state update in ObjectRecognitionScreen
     });
+    _initializeLabeler();
   }
 
   @override
   void dispose() {
     _cameraManager.dispose();
+    _canProcess = false;
+    _imageLabeler.close();
     textRecognizer.close();
     super.dispose();
   }
