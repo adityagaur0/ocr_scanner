@@ -83,7 +83,7 @@ class _ObjectRecognitionScreenState extends State<ObjectRecognitionScreen> {
                           padding: const EdgeInsets.only(bottom: 30.0),
                           child: Center(
                             child: ElevatedButton(
-                              onPressed: _scanImage,
+                              onPressed: _detectObject,
                               child: const Text('Scan text'),
                             ),
                           ),
@@ -132,7 +132,7 @@ class _ObjectRecognitionScreenState extends State<ObjectRecognitionScreen> {
     _canProcess = true;
   }
 
-  Future<void> _scanImage() async {
+  Future<void> _detectObject() async {
     if (_cameraManager.cameraController == null) return;
 
     final navigator = Navigator.of(context);
